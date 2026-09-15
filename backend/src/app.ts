@@ -23,4 +23,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/ops', opsRoutes);
 
+//check if the server is running
+app.get('/', (req, res) => {
+  res.send('Welcome to the Loan Management System API');
+});
+
 export default app;
