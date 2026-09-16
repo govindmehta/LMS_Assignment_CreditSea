@@ -101,3 +101,7 @@ Running the seed script creates these six accounts. Use the shared password **`P
 - `GET` / `POST /api/ops/collection/:loanId`
 
 All protected API calls require an `Authorization: Bearer <JWT>` header.
+
+## Test salary slip
+
+A dummy salary slip, `Payslip_1234_Sep_2026_5452670469668563226_1789547956015.pdf`, is included in the project root for testing. Log in as a borrower, start a loan application, complete the BRE details step, and upload this PDF during the salary-slip upload step.
