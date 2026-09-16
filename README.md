@@ -40,10 +40,10 @@ JWT_SECRET=replace_with_a_long_random_secret
 Create `frontend/.env.local` to configure the API the browser should call:
 
 ```env
-NEXT_PUBLIC_API_URL=add_your_url
+NEXT_PUBLIC_API_URL=your_backend_url
 ```
 
-For a fully local setup, use `NEXT_PUBLIC_API_URL=http://localhost:5000/api` instead. Restart the Next.js server after changing this file.
+For a fully local setup, use `NEXT_PUBLIC_API_URL=http://localhost:5000` instead. The frontend appends `/api` automatically. Restart the Next.js server after changing this file.
 
 Start the backend in one terminal:
 
