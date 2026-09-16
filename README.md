@@ -2,6 +2,12 @@
 
 Loanline is a role-based Loan Management System built with Next.js, Express, TypeScript, MongoDB, Mongoose, and Tailwind CSS. It supports the complete loan lifecycle: borrower application, sanction review, disbursement, repayment collection, and closure.
 
+## Live links
+
+- Live frontend: [https://lms-assignment-creditsea-frontend.onrender.com/](https://lms-assignment-creditsea-frontend.onrender.com/)
+- Backend API: [https://lms-assignment-creditsea.onrender.com/](https://lms-assignment-creditsea.onrender.com/)
+- YouTube walkthrough: [https://www.youtube.com/watch?v=61DtWXIAPk0](https://www.youtube.com/watch?v=61DtWXIAPk0)
+
 ## Features
 
 - Borrower portal with loan status cards, repayment progress, rejection reasons, and a UTR payment ledger.
@@ -18,6 +24,8 @@ Loanline is a role-based Loan Management System built with Next.js, Express, Typ
 - Database: MongoDB Atlas or local MongoDB
 
 ## Run locally
+
+This project is organized into separate `backend` and `frontend` applications. Follow the steps below to set up and run both services locally.
 
 Install dependencies in each application:
 
@@ -60,6 +68,13 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Setup and execution notes
+
+- Ensure MongoDB is running locally or that `MONGO_URI` points to an accessible MongoDB Atlas cluster before starting the backend.
+- Set `NEXT_PUBLIC_API_URL` to the backend base URL appropriate for your environment; do not add `/api`, because the frontend adds it automatically.
+- Use two terminals so the backend and frontend development servers can run at the same time.
+- Seed the database after configuring the backend environment if you want to use the provided role accounts.
 
 ## Seed accounts
 
