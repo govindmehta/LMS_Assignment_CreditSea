@@ -83,8 +83,13 @@ export const disburseLoan = async (req: AuthenticatedRequest, res: Response): Pr
 // 4. Collection Module: Record payment with unique UTR & auto-close check
 export const getCollectionLoans = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const loans = await Loan.find({ status: LoanStatus.DISBURSED }).populate('applicant', 'name email');
-    res.json(loans);
+    const loans = await Loan.find({ status: LoanStatus.DISBURSED }).populate('applicant', 'name email').lean();
+    const payments = await Payment.find({ loan: { $in: loans.map((loan) => loan._id) } }).sort({ paidAt: -1 }).lean();
+    const loansWithPayments = loans.map((loan) => ({
+      ...loan,
+      payments: payments.filter((payment) => payment.loan.toString() === loan._id.toString()),
+    }));
+    res.status(200).json(loansWithPayments);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -100,10 +105,22 @@ export const recordPayment = async (req: AuthenticatedRequest, res: Response): P
 
     const { loanId } = req.params;
     const { utr, amount } = req.body;
+    const paymentAmount = Number(amount);
 
     const loan = await Loan.findById(loanId);
     if (!loan || loan.status !== LoanStatus.DISBURSED) {
       res.status(400).json({ message: 'Invalid loan for recording payment' });
+      return;
+    }
+
+    if (!utr?.trim() || !Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      res.status(400).json({ message: 'A valid UTR number and positive payment amount are required.' });
+      return;
+    }
+
+    const remainingBalance = loan.totalRepayment - loan.totalPaid;
+    if (paymentAmount > remainingBalance) {
+      res.status(400).json({ message: 'Payment amount exceeds remaining balance.' });
       return;
     }
 
@@ -116,11 +133,11 @@ export const recordPayment = async (req: AuthenticatedRequest, res: Response): P
     const payment = await Payment.create({
       loan: loan._id,
       utr,
-      amount: Number(amount),
+      amount: paymentAmount,
       recordedBy: userId, // Guaranteed string, avoiding 'undefined'
     });
 
-    loan.totalPaid += Number(amount);
+    loan.totalPaid += paymentAmount;
     if (loan.totalPaid >= loan.totalRepayment) {
       loan.status = LoanStatus.CLOSED;
       loan.closedAt = new Date();

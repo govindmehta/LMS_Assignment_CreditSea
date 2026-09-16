@@ -4,6 +4,24 @@ import type { AuthenticatedRequest } from '../types/index.js';
 import { Loan, LoanStatus } from '../models/Loan.js';
 import { evaluateBRE } from '../utils/bre.js';
 import { calculateLoanDetails } from '../utils/loanMath.js';
+import { Payment } from '../models/Payment.js';
+
+export const getMyLoans = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ message: 'User authentication required.' });
+      return;
+    }
+    const loans = await Loan.find({ applicant: userId }).sort({ createdAt: -1 }).lean();
+    const payments = await Payment.find({ loan: { $in: loans.map((loan) => loan._id) } })
+      .sort({ paidAt: -1 })
+      .lean();
+    res.status(200).json({ loans, payments });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 // Step 2: Validate Personal Details via BRE
 export const checkEligibility = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -29,6 +47,15 @@ export const applyForLoan = async (req: AuthenticatedRequest, res: Response): Pr
     }
 
     const { fullName, pan, dateOfBirth, monthlySalary, employmentMode, principalAmount, tenureDays, salarySlipUrl } = req.body;
+
+    const existingActiveLoan = await Loan.exists({
+      applicant: userId,
+      status: { $in: [LoanStatus.APPLIED, LoanStatus.SANCTIONED, LoanStatus.DISBURSED] },
+    });
+    if (existingActiveLoan) {
+      res.status(400).json({ message: 'You already have an active loan application. New applications are unavailable until it is closed or rejected.' });
+      return;
+    }
 
     const breResult = evaluateBRE({ dateOfBirth, monthlySalary, pan, employmentMode });
     if (!breResult.passed) {

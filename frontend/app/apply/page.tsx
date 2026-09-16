@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function ApplyPage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function ApplyPage() {
   // Step 2: Salary Slip Path
   const [salarySlipUrl, setSalarySlipUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [checkingEligibility, setCheckingEligibility] = useState(true);
 
   // Step 3: Loan Config Sliders
   const [principalAmount, setPrincipalAmount] = useState(100000);
@@ -30,6 +32,10 @@ export default function ApplyPage() {
   const annualRate = 12;
   const interestAmount = Math.round(((principalAmount * annualRate * tenureDays) / (365 * 100)) * 100) / 100;
   const totalRepayment = Math.round((principalAmount + interestAmount) * 100) / 100;
+
+  useEffect(() => { api.get('/loans/my').then(({ data }) => {
+    if (data.loans.some((loan: any) => ['APPLIED', 'SANCTIONED', 'DISBURSED'].includes(loan.status))) router.replace('/borrower/dashboard');
+  }).catch(() => setError('Unable to verify your application eligibility.')).finally(() => setCheckingEligibility(false)); }, [router]);
 
   // Step 1 BRE Verification
   const handleBRECheck = async (e: React.FormEvent) => {
@@ -76,14 +82,14 @@ export default function ApplyPage() {
         principalAmount,
         tenureDays,
       });
-      alert('Application submitted successfully!');
-      router.push('/dashboard');
+      router.push('/borrower/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to submit loan application');
     }
   };
 
-  return (
+  return <ProtectedRoute allowedRoles={['Borrower']}>
+    {checkingEligibility ? <div className="min-h-screen grid place-items-center text-sm text-slate-500">Checking application eligibility…</div> : (
     <div className="max-w-2xl mx-auto my-10 p-6 bg-white border rounded-xl shadow-sm">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">Borrower Loan Application</h1>
 
@@ -247,6 +253,6 @@ export default function ApplyPage() {
           </button>
         </div>
       )}
-    </div>
-  );
+    </div>)}
+  </ProtectedRoute>;
 }

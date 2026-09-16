@@ -33,9 +33,9 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="w-full max-w-md bg-white p-8 border rounded-xl shadow-sm">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Borrower Registration</h2>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="glass-panel w-full max-w-md p-8 md:p-10">
+        <p className="eyebrow mb-5">BORROWER ONBOARDING</p><h2 className="mb-2 text-3xl font-bold tracking-tight text-gray-900">Start simply.</h2><p className="mb-8 text-sm text-slate-600">Create your borrower account in a minute.</p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
@@ -50,7 +50,7 @@ export default function SignupPage() {
               type="text"
               required
               placeholder="John Doe"
-              className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-black/20 bg-white/65 p-3"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -62,7 +62,7 @@ export default function SignupPage() {
               type="email"
               required
               placeholder="john@example.com"
-              className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-black/20 bg-white/65 p-3"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -74,7 +74,7 @@ export default function SignupPage() {
               type="password"
               required
               placeholder="••••••••"
-              className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full border border-black/20 bg-white/65 p-3"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -83,7 +83,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition"
+            className="ink-button w-full py-3 font-semibold"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>

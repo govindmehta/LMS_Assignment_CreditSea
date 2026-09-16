@@ -4,28 +4,24 @@ import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Loan Management System</h1>
-      <p className="text-gray-600 max-w-md mb-8">
-        Apply for quick loans or access the operations dashboard to process applications.
-      </p>
-      
-      <div className="flex space-x-4">
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 py-16">
+      <section className="grid w-full overflow-hidden border border-black/20 bg-white/45 md:grid-cols-[1.1fr_.9fr]">
+        <div className="p-8 md:p-14"><p className="eyebrow mb-8">LOAN MANAGEMENT · 2026</p><h1 className="max-w-xl text-5xl font-bold tracking-[-.06em] text-black md:text-7xl">Money, made <span className="bg-[#f3f0c9] px-2">clear.</span></h1><p className="my-8 max-w-md text-lg leading-relaxed text-slate-600">A calm, transparent workspace for borrowers and loan operations teams.</p>
+      <div className="flex flex-wrap gap-3">
         <Link 
           href="/login" 
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition"
+          className="ink-button px-6 py-3 font-semibold"
         >
           Login
         </Link>
         <Link 
           href="/signup" 
-          className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow hover:bg-gray-900 transition"
+          className="outline-button px-6 py-3 font-semibold"
         >
           Sign Up as Borrower
         </Link>
-      </div>
-
-      <div className="mt-12 p-4 bg-white border rounded-lg max-w-sm text-left text-xs text-gray-500 shadow-sm">
+      </div></div>
+      <aside className="border-t border-black/15 bg-[#f3f0c9]/60 p-8 md:border-l md:border-t-0 md:p-14"><p className="eyebrow mb-7">QUICK ACCESS</p><h2 className="text-3xl font-bold tracking-tight">A single place for every loan decision.</h2><div className="mt-10 border border-black bg-white/45 p-4 text-left text-xs text-gray-600">
         <p className="font-bold mb-1 text-gray-700">Seeded Role Test Credentials (Password: Password123!):</p>
         <ul className="list-disc pl-4 space-y-0.5">
           <li>borrower@lms.com (Borrower)</li>
@@ -35,7 +31,7 @@ export default function HomePage() {
           <li>collection@lms.com (Collection Exec)</li>
           <li>admin@lms.com (Admin)</li>
         </ul>
-      </div>
-    </div>
+      </div></aside></section>
+    </main>
   );
 }
