@@ -27,6 +27,7 @@ export interface ILoan extends Document {
   breRejectionReason?: string;
 
   // Documents
+  salarySlipId?: Types.ObjectId;
   salarySlipUrl?: string;
 
   // Terms & Interest Math
@@ -61,6 +62,7 @@ const loanSchema = new Schema<ILoan>(
     brePassed: { type: Boolean, required: true, default: false },
     breRejectionReason: { type: String },
 
+    salarySlipId: { type: Schema.Types.ObjectId, ref: 'SalarySlip' },
     salarySlipUrl: { type: String },
 
     principalAmount: { type: Number, required: true, min: 50000, max: 500000 },

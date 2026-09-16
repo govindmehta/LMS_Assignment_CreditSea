@@ -125,18 +125,20 @@ export default function BorrowerDashboard() {
                         {loan.rejectionReason || "No reason was provided."}
                       </div>
                     )}
-                    <div className="mt-4">
-                      <div className="mb-1 flex justify-between text-xs text-slate-500">
-                        <span>Repayment progress</span>
-                        <span>{progress.toFixed(0)}% paid</span>
+                    {loan.status !== "REJECTED" && (
+                      <div className="mt-4">
+                        <div className="mb-1 flex justify-between text-xs text-slate-500">
+                          <span>Repayment progress</span>
+                          <span>{progress.toFixed(0)}% paid</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-full bg-emerald-500"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className="h-full bg-emerald-500"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
+                    )}
                   </article>
                 );
               })}

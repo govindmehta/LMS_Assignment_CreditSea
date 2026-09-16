@@ -1,6 +1,6 @@
 // src/routes/loanRoutes.ts
 import { Router } from 'express';
-import { checkEligibility, applyForLoan, uploadFile, getMyLoans } from '../controllers/loanController.js';
+import { checkEligibility, applyForLoan, uploadFile, getMyLoans, getSalarySlip } from '../controllers/loanController.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { uploadSalarySlip } from '../middleware/upload.js';
 import { authorizeRoles } from '../middleware/rbac.js';
@@ -11,6 +11,7 @@ router.use(authenticateToken);
 
 router.post('/check-bre', checkEligibility);
 router.post('/upload', uploadSalarySlip.single('salarySlip'), uploadFile);
+router.get('/documents/:documentId', getSalarySlip);
 router.get('/my', authorizeRoles(UserRole.BORROWER), getMyLoans);
 router.post('/apply', authorizeRoles(UserRole.BORROWER), applyForLoan);
 

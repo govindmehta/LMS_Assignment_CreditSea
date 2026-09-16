@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StatusPill from "@/components/StatusPill";
@@ -27,6 +27,7 @@ function OpsDashboard() {
   const [error, setError] = useState("");
   const [reason, setReason] = useState("");
   const [slip, setSlip] = useState<string | null>(null);
+  const previewUrl = useRef<string | null>(null);
   const [forms, setForms] = useState<
     Record<string, { utr: string; amount: string }>
   >({});
@@ -79,6 +80,24 @@ function OpsDashboard() {
       setError(e.response?.data?.message || "Action failed.");
     }
   };
+  const previewSalarySlip = async (salarySlipId: string) => {
+    try {
+      const response = await api.get(`/loans/documents/${salarySlipId}`, { responseType: "blob" });
+      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+      previewUrl.current = URL.createObjectURL(response.data);
+      setSlip(previewUrl.current);
+    } catch (e: any) {
+      setError(e.response?.data?.message || "Could not load the salary slip preview.");
+    }
+  };
+  const closePreview = () => {
+    if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+    previewUrl.current = null;
+    setSlip(null);
+  };
+  useEffect(() => () => {
+    if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+  }, []);
   return (
     <main className="mx-auto w-full max-w-7xl px-5 py-8">
       <p className="text-sm font-semibold text-blue-700">OPERATIONS PORTAL</p>
@@ -167,9 +186,9 @@ function OpsDashboard() {
                       {x.pan} · {money(x.principalAmount)} · Salary{" "}
                       {money(x.monthlySalary)}
                     </p>
-                    {x.salarySlipUrl && (
+                    {(x.salarySlipId || x.salarySlipUrl) && (
                       <button
-                        onClick={() => setSlip(x.salarySlipUrl)}
+                        onClick={() => x.salarySlipId ? previewSalarySlip(x.salarySlipId) : setSlip(`http://localhost:5000${x.salarySlipUrl}`)}
                         className="mt-2 text-sm font-semibold text-blue-600"
                       >
                         Preview salary slip
@@ -345,12 +364,12 @@ function OpsDashboard() {
           <div className="flex h-[85vh] w-full max-w-4xl flex-col rounded-xl bg-white">
             <div className="flex justify-between border-b p-3">
               <b>Salary slip preview</b>
-              <button onClick={() => setSlip(null)} className="text-xl">
+              <button onClick={closePreview} className="text-xl">
                 ×
               </button>
             </div>
             <iframe
-              src={`http://localhost:5000${slip}`}
+              src={slip}
               title="Salary slip"
               className="min-h-0 flex-1"
             />

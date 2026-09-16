@@ -5,6 +5,9 @@ import { Loan, LoanStatus } from '../models/Loan.js';
 import { evaluateBRE } from '../utils/bre.js';
 import { calculateLoanDetails } from '../utils/loanMath.js';
 import { Payment } from '../models/Payment.js';
+import { SalarySlip } from '../models/SalarySlip.js';
+import { UserRole } from '../models/User.js';
+import { isValidObjectId } from 'mongoose';
 
 export const getMyLoans = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -46,7 +49,14 @@ export const applyForLoan = async (req: AuthenticatedRequest, res: Response): Pr
       return;
     }
 
-    const { fullName, pan, dateOfBirth, monthlySalary, employmentMode, principalAmount, tenureDays, salarySlipUrl } = req.body;
+    const { fullName, pan, dateOfBirth, monthlySalary, employmentMode, principalAmount, tenureDays, salarySlipId, salarySlipUrl } = req.body;
+
+    if (salarySlipId) {
+      if (!isValidObjectId(salarySlipId) || !await SalarySlip.exists({ _id: salarySlipId, uploadedBy: userId })) {
+        res.status(400).json({ message: 'The uploaded salary slip could not be found.' });
+        return;
+      }
+    }
 
     const existingActiveLoan = await Loan.exists({
       applicant: userId,
@@ -73,6 +83,7 @@ export const applyForLoan = async (req: AuthenticatedRequest, res: Response): Pr
       monthlySalary,
       employmentMode,
       brePassed: true,
+      salarySlipId,
       salarySlipUrl,
       principalAmount,
       tenureDays,
@@ -89,10 +100,60 @@ export const applyForLoan = async (req: AuthenticatedRequest, res: Response): Pr
 };
 
 // Step 3: Handle Salary Slip Upload
-export const uploadFile = (req: AuthenticatedRequest, res: Response): void => {
+export const uploadFile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ message: 'No file uploaded' });
     return;
   }
-  res.json({ fileUrl: `/uploads/${req.file.filename}` });
+
+  const userId = req.user?.userId;
+  if (!userId) {
+    res.status(401).json({ message: 'User authentication required.' });
+    return;
+  }
+
+  try {
+    const salarySlip = await SalarySlip.create({
+      uploadedBy: userId,
+      originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      data: req.file.buffer,
+    });
+    res.status(201).json({ salarySlipId: salarySlip._id.toString() });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getSalarySlip = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    const { documentId } = req.params;
+    if (!userId) {
+      res.status(401).json({ message: 'User authentication required.' });
+      return;
+    }
+    if (!isValidObjectId(documentId)) {
+      res.status(404).json({ message: 'Salary slip not found.' });
+      return;
+    }
+
+    const salarySlip = await SalarySlip.findById(documentId);
+    const canReview = req.user?.role === UserRole.SANCTION || req.user?.role === UserRole.ADMIN;
+    if (!salarySlip || (!canReview && salarySlip.uploadedBy.toString() !== userId)) {
+      res.status(404).json({ message: 'Salary slip not found.' });
+      return;
+    }
+
+    res.set({
+      'Content-Type': salarySlip.mimeType,
+      'Content-Length': String(salarySlip.size),
+      'Content-Disposition': `inline; filename="${salarySlip.originalName.replace(/["\\]/g, '_')}"`,
+      'Cache-Control': 'private, no-store',
+    });
+    res.send(salarySlip.data);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
 };

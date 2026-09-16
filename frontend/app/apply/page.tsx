@@ -20,7 +20,7 @@ export default function ApplyPage() {
   });
 
   // Step 2: Salary Slip Path
-  const [salarySlipUrl, setSalarySlipUrl] = useState('');
+  const [salarySlipId, setSalarySlipId] = useState('');
   const [uploading, setUploading] = useState(false);
   const [checkingEligibility, setCheckingEligibility] = useState(true);
 
@@ -63,7 +63,7 @@ export default function ApplyPage() {
       const res = await api.post('/loans/upload', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setSalarySlipUrl(res.data.fileUrl);
+      setSalarySlipId(res.data.salarySlipId);
       setStep(3); // Proceed to loan configuration
     } catch (err: any) {
       setError(err.response?.data?.message || 'File upload failed');
@@ -78,7 +78,7 @@ export default function ApplyPage() {
     try {
       await api.post('/loans/apply', {
         ...formData,
-        salarySlipUrl,
+        salarySlipId,
         principalAmount,
         tenureDays,
       });
